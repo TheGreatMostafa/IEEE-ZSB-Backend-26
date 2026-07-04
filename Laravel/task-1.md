@@ -4,9 +4,9 @@ this one's less "here's a new feature" and more "here's four ideas i kept hearin
 
 ---
 
-## Blade — why the views don't look like normal PHP anymore
+## Blade : why the views don't look like normal PHP anymore
 
-first thing i noticed switching to Laravel: the view files don't have `<?php ?>` tags jammed everywhere. they use stuff like `{{ }}` and `@foreach` instead. turns out this is Blade, Laravel's templating engine, and it's not actually running that syntax directly — it's translating it first.
+first thing i noticed switching to Laravel: the view files don't have `<?php ?>` tags jammed everywhere. they use stuff like `{{ }}` and `@foreach` instead. turns out this is Blade, Laravel's templating engine, and it's not actually running that syntax directly, it's translating it first.
 
 ```
 resources/views/products/index.blade.php   ← what i write
@@ -14,7 +14,7 @@ resources/views/products/index.blade.php   ← what i write
 storage/framework/views/7c2ad9.php          ← what actually runs
 ```
 
-so the first person to visit a page pays a tiny compile cost, and literally everyone after that just hits the already-compiled plain PHP file. if i never touch the blade file again, it never recompiles again either. that explains why editing a view sometimes feels like it "didn't update" — you're looking at a stale cached file if something's misconfigured.
+so the first person to visit a page pays a tiny compile cost, and literally everyone after that just hits the already-compiled plain PHP file. if i never touch the blade file again, it never recompiles again either. that explains why editing a view sometimes feels like it "didn't update" , you're looking at a stale cached file if something's misconfigured.
 
 what actually gets compiled:
 
@@ -30,7 +30,7 @@ what actually gets compiled:
 ?>
 ```
 
-that `e()` wrapper is doing `htmlspecialchars()` under the hood. so `{{ }}` isn't just shorthand for echo, it's echo-with-safety-built-in. if someone's product name field somehow had `<script>...</script>` in it, this just prints it as text on the page instead of running it. you'd have to go out of your way and use `{!! !!}` instead to turn that off, which is a good default honestly — nobody has to remember to escape things, you'd have to remember to *not* escape.
+that `e()` wrapper is doing `htmlspecialchars()` under the hood. so `{{ }}` isn't just shorthand for echo, it's echo-with-safety-built-in. if someone's product name field somehow had `<script>...</script>` in it, this just prints it as text on the page instead of running it. you'd have to go out of your way and use `{!! !!}` instead to turn that off, which is a good default honestly , nobody has to remember to escape things, you'd have to remember to *not* escape.
 
 directives (`@if`, `@foreach`, etc.) are just the PHP control structures wearing a nicer outfit:
 
@@ -88,7 +88,7 @@ any page that does `@extends('layouts.storefront')` just slots its content into 
 
 ---
 
-## the ORM — stop writing SQL for every little thing
+## the ORM : stop writing SQL for every little thing
 
 before this i was writing raw PDO everywhere. `prepare()`, `execute()`, `fetchAll()`, repeated in every controller. Eloquent (Laravel's ORM) replaces most of that with plain PHP method calls.
 
@@ -149,7 +149,7 @@ $order->save(); // insert + timestamps, handled
 
 ---
 
-## Facades — why `Route::get()` isn't actually a static method
+## Facades: why `Route::get()` isn't actually a static method
 
 this one confused me at first because `Storage::put(...)` LOOKS like a static method call on a class called `Storage`. but `Storage` doesn't actually contain any file-handling code. it's a proxy.
 
@@ -164,15 +164,15 @@ $disk->put('avatars/user1.png', $imageData);
 ?>
 ```
 
-so `Storage::put()` is really "go grab the real filesystem service out of the container, and call `put()` on that." the facade is just a friendly nickname pointing at something registered elsewhere. that's the whole Facade pattern — you get one simple call, and a much bigger, more annoying system sits behind it that you never have to think about.
+so `Storage::put()` is really "go grab the real filesystem service out of the container, and call `put()` on that." the facade is just a friendly nickname pointing at something registered elsewhere. that's the whole Facade pattern, you get one simple call, and a much bigger, more annoying system sits behind it that you never have to think about.
 
-`Mail::to($customer->email)->send(new OrderShipped($order));` is the same deal — behind that one line is a transport driver, a queue, and template rendering, but i only ever have to write that one line to use it.
+`Mail::to($customer->email)->send(new OrderShipped($order));` is the same deal, behind that one line is a transport driver, a queue, and template rendering, but i only ever have to write that one line to use it.
 
 why bother with this instead of just calling the real class directly? because i'd otherwise have to know how to resolve `filesystem` or `mailer` out of the container every single time, remember the exact binding key, etc. the facade just gives me a short name to remember instead.
 
 ---
 
-## Factories — generating fake data without losing my mind
+## Factories: generating fake data without losing my mind
 
 this one's specifically for testing and seeding. instead of manually typing out 30 fake products to test something, i define what a "normal" product looks like once:
 
@@ -200,9 +200,9 @@ Product::factory()->create();          // one fake product
 Product::factory()->count(30)->create(); // 30 of them, one line
 ```
 
-the calling code doesn't need to know anything about how a product gets built — price ranges, faker logic, none of it. it just says "give me a product" and gets one back. that's the actual point of the Factory pattern, generalized beyond just testing: hide the messy construction logic behind a method that just hands you the finished object.
+the calling code doesn't need to know anything about how a product gets built, price ranges, faker logic, none of it. it just says "give me a product" and gets one back. that's the actual point of the Factory pattern, generalized beyond just testing: hide the messy construction logic behind a method that just hands you the finished object.
 
-factories can also have "states" — variations on the base definition, without duplicating the whole thing:
+factories can also have "states", variations on the base definition, without duplicating the whole thing:
 
 ```php
 <?php
@@ -222,11 +222,11 @@ still don't have to know how a sale product is different internally, i just ask 
 
 ---
 
-## SOLID — the five rules i kept seeing in every article about "clean code"
+## SOLID: the five rules i kept seeing in every article about "clean code"
 
 i'm not going to pretend i fully internalized all five of these overnight, but here's what actually clicked for each one, with a tiny example.
 
-**S — single responsibility.** a class should only have one reason to change. i was originally shoving save/pdf/email logic all into one `Order` class:
+**S: single responsibility.** a class should only have one reason to change. i was originally shoving save/pdf/email logic all into one `Order` class:
 
 ```php
 <?php
@@ -249,7 +249,7 @@ class OrderNotifier { public function notify(Order $order) { /* just email */ } 
 
 now if the invoice layout changes, i only touch `InvoicePdfGenerator`. nothing else even knows that class exists.
 
-**O — open/closed.** you should be able to add new behavior without editing old, already-working code. i had this:
+**O: open/closed.** you should be able to add new behavior without editing old, already-working code. i had this:
 
 ```php
 <?php
@@ -274,7 +274,7 @@ class OvernightShipping implements ShippingMethod {
 
 adding overnight shipping is a brand new class. `StandardShipping` never gets touched, never risks breaking.
 
-**L — liskov substitution.** any subclass should be able to stand in for its parent without weird surprises. classic example that finally made this click for me was Rectangle/Square:
+**L: liskov substitution.** any subclass should be able to stand in for its parent without weird surprises. classic example that finally made this click for me was Rectangle/Square:
 
 ```php
 <?php
@@ -289,7 +289,7 @@ class Square extends Rectangle {
 
 code that expects a `Rectangle` and calls `setWidth()` then `setHeight()` separately gets weird, wrong results if it's secretly holding a `Square`. the fix is to stop pretending square IS-A rectangle in code terms and just give both their own independent `area()` implementation off a shared `Shape` interface, so nothing assumes width and height move independently.
 
-**I — interface segregation.** don't force a class to implement methods it'll never use.
+**I: interface segregation.** don't force a class to implement methods it'll never use.
 
 ```php
 <?php
@@ -302,7 +302,7 @@ interface Printer {
 
 my cheap inkjet printer can't scan or fax. under this interface it'd have to fake those methods just to compile. split into smaller interfaces (`CanPrint`, `CanScan`) and it only implements what it can actually do.
 
-**D — dependency inversion.** high-level code shouldn't be locked to one specific low-level implementation.
+**D: dependency inversion.** high-level code shouldn't be locked to one specific low-level implementation.
 
 ```php
 <?php
@@ -324,6 +324,6 @@ class PaymentProcessor {
 }
 ```
 
-now swapping stripe for paypal, or plugging in a fake gateway for tests, doesn't touch `PaymentProcessor` at all — the container just hands it whatever gateway is currently bound.
+now swapping stripe for paypal, or plugging in a fake gateway for tests, doesn't touch `PaymentProcessor` at all, the container just hands it whatever gateway is currently bound.
 
 ---
